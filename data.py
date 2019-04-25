@@ -39,13 +39,13 @@ def get_word_dict(sentences):
 def get_glove(word_dict, glove_path):
     # create word_vec with glove vectors
     word_vec = {}
-    with open(glove_path) as f:
+    with open(glove_path, encoding='UTF-8') as f:
         for line in f:
             word, vec = line.split(' ', 1)
             if word in word_dict:
                 word_vec[word] = np.array(list(map(float, vec.split())))
     print('Found {0}(/{1}) words with glove vectors'.format(
-                len(word_vec), len(word_dict)))
+        len(word_vec), len(word_dict)))
     return word_vec
 
 
@@ -75,13 +75,13 @@ def get_nli(data_path):
         s2[data_type]['sent'] = [line.rstrip() for line in
                                  open(s2[data_type]['path'], 'r')]
         target[data_type]['data'] = np.array([dico_label[line.rstrip('\n')]
-                for line in open(target[data_type]['path'], 'r')])
+                                              for line in open(target[data_type]['path'], 'r')])
 
         assert len(s1[data_type]['sent']) == len(s2[data_type]['sent']) == \
             len(target[data_type]['data'])
 
         print('** {0} DATA : Found {1} pairs of {2} sentences.'.format(
-                data_type.upper(), len(s1[data_type]['sent']), data_type))
+            data_type.upper(), len(s1[data_type]['sent']), data_type))
 
     train = {'s1': s1['train']['sent'], 's2': s2['train']['sent'],
              'label': target['train']['data']}

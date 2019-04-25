@@ -13,6 +13,7 @@ __pycache__/
 
 # pickle files
 *.pkl
+*.pickle
 
 # datasets
 dataset/SNLI/
