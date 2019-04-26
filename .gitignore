@@ -21,3 +21,4 @@ dataset/MultiNLI/
 dataset/AllNLI/
 dataset/GloVe
 dataset/fastText
+dataset/customNLI

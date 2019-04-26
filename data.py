@@ -8,6 +8,8 @@
 import os
 import numpy as np
 import torch
+import json
+import random
 
 
 def get_batch(batch, word_vec, emb_dim=300):
@@ -90,3 +92,33 @@ def get_nli(data_path):
     test = {'s1': s1['test']['sent'], 's2': s2['test']['sent'],
             'label': target['test']['data']}
     return train, dev, test
+
+def get_custom_nli(data_path):
+    dico_label = {'went_down': 0, 'neutral': 1, 'went_up': 2}
+    custom_nli_f = open(os.path.join(data_path, 'conf_65_per_pair_LA_up_down.json'), 'r')
+    custom_nli_data = json.load(custom_nli_f)
+
+    valid_nli_data = list(filter(lambda x: x['gold_label'] != -999, custom_nli_data))
+    '''
+    random.shuffle(valid_nli_data)
+    testset = valid_nli_data[: int(len(valid_nli_data) * 0.1)]
+    devset = valid_nli_data[int(len(valid_nli_data) * 0.1) : int(len(valid_nli_data) * 0.2)]
+    trainset = valid_nli_data[int(len(valid_nli_data) * 0.2) :]
+
+    train = {'s1': [data['sentence1'].rstrip() for data in trainset],
+             's2': [data['sentence2'].rstrip() for data in trainset],
+             'label': np.array([data['gold_label']for data in trainset])}
+    dev = {'s1': [data['sentence1'].rstrip() for data in devset],
+           's2': [data['sentence2'].rstrip() for data in devset],
+           'label': np.array([data['gold_label'] for data in devset])}
+    test = {'s1': [data['sentence1'].rstrip() for data in testset],
+            's2': [data['sentence2'].rstrip() for data in testset],
+            'label': np.array([data['gold_label'] for data in testset])}
+    '''
+    test = {'s1': [data['sentence1'].rstrip() for data in valid_nli_data],
+            's2': [data['sentence2'].rstrip() for data in valid_nli_data],
+            'label': np.array([2 - data['gold_label'] for data in valid_nli_data])}
+    
+    print('** CUSTOM NLI DATA: Found %d pairs.' % len(valid_nli_data))
+
+    return test

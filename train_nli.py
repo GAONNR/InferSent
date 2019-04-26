@@ -16,7 +16,7 @@ import torch
 from torch.autograd import Variable
 import torch.nn as nn
 
-from data import get_nli, get_batch, build_vocab
+from data import get_nli, get_batch, build_vocab, get_custom_nli
 from mutils import get_optimizer
 from models import NLINet
 
@@ -25,6 +25,8 @@ parser = argparse.ArgumentParser(description='NLI training')
 # paths
 parser.add_argument("--nlipath", type=str, default='dataset/SNLI/',
                     help="NLI data path (SNLI or MultiNLI)")
+parser.add_argument("--custompath", type=str, default=None,
+                    help="custom NLI data path")
 parser.add_argument("--outputdir", type=str,
                     default='savedir/', help="Output directory")
 parser.add_argument("--outputmodelname", type=str, default='model.pickle')
@@ -48,6 +50,8 @@ parser.add_argument("--decay", type=float, default=0.99, help="lr decay")
 parser.add_argument("--minlr", type=float, default=1e-5, help="minimum lr")
 parser.add_argument("--max_norm", type=float, default=5.,
                     help="max norm (grad clipping)")
+parser.add_argument("--verbose", type=int, default=100)
+
 
 # model
 parser.add_argument("--encoder_type", type=str,
@@ -91,6 +95,8 @@ torch.cuda.manual_seed(params.seed)
 DATA
 """
 train, valid, test = get_nli(params.nlipath)
+if params.custompath:
+    test = get_custom_nli(params.custompath)
 word_vec = build_vocab(train['s1'] + train['s2'] +
                        valid['s1'] + valid['s2'] +
                        test['s1'] + test['s2'], params.word_emb_path)
@@ -225,7 +231,7 @@ def trainepoch(epoch):
         optimizer.step()
         optimizer.param_groups[0]['lr'] = current_lr
 
-        if len(all_costs) == 100:
+        if len(all_costs) == params.verbose:
             logs.append('{0} ; loss {1} ; sentence/s {2} ; words/s {3} ; accuracy train : {4}'.format(
                 stidx, round(np.mean(all_costs), 2),
                 int(len(all_costs) * params.batch_size /
